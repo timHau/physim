@@ -1,0 +1,8 @@
+[package]
+name = "physicsimulation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nannou = "0.17"
+ndarray = "0.15.6"

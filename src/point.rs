@@ -10,6 +10,15 @@ pub struct Point {
 }
 
 impl Point {
+    pub fn new(pos: Array1<f32>, radius: f32) -> Self {
+        Self {
+            pos_cur: pos.clone(),
+            pos_old: pos,
+            acc: arr1(&[0.0, 0.0]),
+            radius,
+        }
+    }
+
     pub fn render(&self, draw: &Draw) {
         draw.ellipse()
             .x_y(self.pos_cur[0], self.pos_cur[1])
@@ -26,16 +35,5 @@ impl Point {
 
     pub fn accelerate(&mut self, acc: &Array1<f32>) {
         self.acc = &self.acc + acc.clone();
-    }
-}
-
-impl Default for Point {
-    fn default() -> Self {
-        Self {
-            pos_cur: arr1(&[150.0, 0.0]),
-            pos_old: arr1(&[150.0, 0.0]),
-            acc: arr1(&[0.0, 0.0]),
-            radius: 50.0,
-        }
     }
 }

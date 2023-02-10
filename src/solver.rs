@@ -1,4 +1,4 @@
-use crate::point::Point;
+use crate::{point::Point, CONSTRAINT_RADIUS};
 use ndarray::{arr1, Array1};
 
 pub struct Solver {
@@ -32,7 +32,7 @@ impl Solver {
 
     pub fn apply_constraint(&mut self) {
         let pos = arr1(&[0.0, 0.0]);
-        let radius = 200.0;
+        let radius = CONSTRAINT_RADIUS;
         for point in self.points.iter_mut() {
             let d = &point.pos_cur.clone() - &pos;
             let dist = d.dot(&d).sqrt();
@@ -68,10 +68,7 @@ impl Default for Solver {
     fn default() -> Self {
         Self {
             gravity: arr1(&[0.0, -1000.0]),
-            points: vec![
-                Point::new(arr1(&[100.0, 50.0]), 10.0),
-                Point::new(arr1(&[-100.0, 50.0]), 10.0),
-            ],
+            points: vec![],
             sub_steps: 8,
         }
     }

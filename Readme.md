@@ -17,7 +17,7 @@ rustup update
 
 We need nightly rust, because we make use of the `get_many_mut` feature, which is currently not yet in stable rust.
 
-## Running
+## Getting started
 To run the simulation you should use the release version
 ```
 cargo run --release

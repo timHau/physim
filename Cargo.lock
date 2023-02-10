@@ -1885,6 +1885,7 @@ version = "0.1.0"
 dependencies = [
  "nannou",
  "ndarray",
+ "rand 0.8.5",
 ]
 
 [[package]]

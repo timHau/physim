@@ -10,7 +10,7 @@ use solver::Solver;
 
 const WIDTH: u32 = 1000;
 const HEIGHT: u32 = 1000;
-const TIME_STEP: f32 = 0.01;
+const TIME_STEP: f32 = 0.02;
 const CONSTRAINT_RADIUS: f32 = 400.0;
 
 struct Model {
@@ -24,15 +24,13 @@ fn model(_app: &App) -> Model {
 
 fn update(app: &App, model: &mut Model, _update: Update) {
     let frames = app.elapsed_frames();
-    if frames % 10 == 0 {
-        println!("FPS: {}", app.fps());
+    if frames % 10 == 0 && frames < 2000 {
+        println!("FPS: {}, frames: {}", app.fps(), (frames as f32).sin());
         let mut rng = rand::thread_rng();
-        let start_pos = arr1(&[rng.gen_range(-CONSTRAINT_RADIUS..CONSTRAINT_RADIUS), 0.0]);
-        let point = point::Point::new(
-            start_pos,
-            rng.gen_range(10.0..30.0),
-            [0.0, 0.8, rng.gen_range(0.0..1.0)],
-        );
+        let radius = rng.gen_range(10.0..30.0);
+        let start_pos = arr1(&[(frames as f32).sin(), 300.0 + radius]);
+        let col = rng.gen_range(0.4..1.0);
+        let point = point::Point::new(start_pos, radius, [col, col, col]);
         model.solver.points.push(point);
     }
     model.solver.update(TIME_STEP);
@@ -62,11 +60,8 @@ fn event(app: &App, model: &mut Model, event: Event) {
         let mouse = app.mouse.position();
         let pos = arr1(&[mouse.x, mouse.y]);
         let mut rng = rand::thread_rng();
-        let color = [
-            rng.gen_range(0.0..1.0),
-            rng.gen_range(0.0..1.0),
-            rng.gen_range(0.0..1.0),
-        ];
+        let col = rng.gen_range(0.4..1.0);
+        let color = [col, col, col];
         let point = point::Point::new(pos, rng.gen_range(10.0..20.0), color);
         model.solver.points.push(point);
     }

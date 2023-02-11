@@ -1,9 +1,8 @@
-use crate::{link::Link, point::Point, CONSTRAINT_RADIUS};
+use crate::{object::PhysicsTarget, point::Point, CONSTRAINT_RADIUS};
 use nannou::prelude::Vec2;
 
 pub struct Solver {
-    pub points: Vec<Point>,
-    pub links: Vec<Link>,
+    pub objects: Vec<Box<dyn PhysicsTarget>>,
     gravity: Vec2,
     sub_steps: usize,
 }
@@ -20,45 +19,31 @@ impl Solver {
     }
 
     pub fn update_positions(&mut self, dt: f32) {
-        for point in self.points.iter_mut() {
-            point.update_position(dt);
+        for obj in self.objects.iter_mut() {
+            obj.update_position(dt);
         }
     }
 
     pub fn apply_gravity(&mut self) {
-        for point in self.points.iter_mut() {
-            point.accelerate(&self.gravity);
+        for obj in self.objects.iter_mut() {
+            obj.accelerate(&self.gravity);
         }
     }
 
     pub fn apply_constraint(&mut self) {
-        let pos = Vec2::new(0.0, 0.0);
-        let radius = CONSTRAINT_RADIUS;
-        for point in self.points.iter_mut() {
-            let d = point.pos_cur - pos;
-            let dist = d.length();
-            if dist > radius - point.radius {
-                let dir = d / dist;
-                point.pos_cur = pos + dir * (radius - point.radius);
-            }
+        let constraint = Point::new([0.0, 0.0], CONSTRAINT_RADIUS, [0.0, 0.0, 0.0]);
+        for obj in self.objects.iter_mut() {
+            obj.apply_constraints(&constraint);
         }
     }
 
     pub fn solve_collisions(&mut self) {
-        let num_points = self.points.len();
+        let num_objs = self.objects.len();
 
-        for i in 0..num_points {
-            for k in (i + 1)..num_points {
-                if let Ok([p1, p2]) = self.points.get_many_mut([i, k]) {
-                    let d = p1.pos_cur - p2.pos_cur;
-                    let dist = d.length();
-                    let min_dist = p1.radius + p2.radius;
-                    if dist < min_dist {
-                        let dir = d / dist;
-                        let delta = 0.5 * (min_dist - dist);
-                        p1.pos_cur = p1.pos_cur + 0.5 * dir * delta;
-                        p2.pos_cur = p2.pos_cur - 0.5 * dir * delta;
-                    }
+        for i in 0..num_objs {
+            for k in (i + 1)..num_objs {
+                if let Ok([p1, p2]) = self.objects.get_many_mut([i, k]) {
+                    p1.solve_collisions(p2);
                 }
             }
         }
@@ -69,8 +54,7 @@ impl Default for Solver {
     fn default() -> Self {
         Self {
             gravity: Vec2::new(0.0, -1000.0),
-            points: vec![],
-            links: vec![],
+            objects: vec![],
             sub_steps: 8,
         }
     }

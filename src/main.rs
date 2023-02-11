@@ -1,6 +1,7 @@
 #![feature(get_many_mut)]
 
 mod link;
+mod object;
 mod point;
 mod solver;
 
@@ -25,7 +26,6 @@ fn model(_app: &App) -> Model {
         target_dist: 100.0,
     };
     link.start.is_fixed = true;
-    solver.links.push(link);
     Model { solver }
 }
 
@@ -47,12 +47,14 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
     draw.background().color(WHITE);
 
+    // draw the constraint
     draw.ellipse()
         .x_y(0.0, 0.0)
         .w_h(2.0 * CONSTRAINT_RADIUS, 2.0 * CONSTRAINT_RADIUS)
         .color(BLACK);
-    for point in &model.solver.points {
-        point.render(&draw);
+
+    for obj in &model.solver.objects {
+        obj.render(&draw);
     }
 
     draw.to_frame(app, &frame).unwrap();
@@ -69,7 +71,7 @@ fn event(app: &App, model: &mut Model, event: Event) {
         let col = rng.gen_range(0.4..1.0);
         let color = [col, col, col];
         let point = point::Point::new([mouse.x, mouse.y], rng.gen_range(10.0..20.0), color);
-        model.solver.points.push(point);
+        model.solver.objects.push(Box::new(point));
     }
 }
 fn main() {

@@ -22,10 +22,11 @@ fn model(_app: &App) -> Model {
     let mut solver = Solver::default();
     let mut link = link::Link {
         start: point::Point::new([0.0, 0.0], 10.0, [1.0, 1.0, 1.0]),
-        end: point::Point::new([100.0, 0.0], 10.0, [1.0, 1.0, 1.0]),
-        target_dist: 100.0,
+        end: point::Point::new([4.0, 20.0], 10.0, [1.0, 1.0, 1.0]),
+        target_dist: 25.0,
     };
-    link.start.is_fixed = true;
+    // link.start.is_fixed = true;
+    solver.objects.push(Box::new(link));
     Model { solver }
 }
 

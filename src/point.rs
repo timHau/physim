@@ -1,4 +1,7 @@
-use crate::object::{PhysicsObject, PhysicsTarget};
+use crate::{
+    link::Link,
+    object::{PhysicsObject, PhysicsTarget},
+};
 use nannou::prelude::*;
 use std::any::Any;
 
@@ -35,6 +38,11 @@ impl Point {
             other.pos_cur = other.pos_cur - 0.5 * dir * delta;
         }
     }
+
+    fn solve_link_collisions(&mut self, other: &mut Link) {
+        self.solve_point_collisions(&mut other.start);
+        self.solve_point_collisions(&mut other.end);
+    }
 }
 
 impl PhysicsTarget for Point {
@@ -46,9 +54,7 @@ impl PhysicsTarget for Point {
     }
 
     fn accelerate(&mut self, acc: &Vec2) {
-        if !self.is_fixed {
-            self.acc = self.acc + acc.clone();
-        }
+        self.acc = self.acc + acc.clone();
     }
 
     fn apply_constraints(&mut self, constraint: &Point) {
@@ -69,7 +75,10 @@ impl PhysicsTarget for Point {
                 let other = other.as_any().downcast_mut::<Point>().unwrap();
                 self.solve_point_collisions(other);
             }
-            PhysicsObject::Link => todo!("Link collisions not implemented yet!"),
+            PhysicsObject::Link => {
+                let other = other.as_any().downcast_mut::<Link>().unwrap();
+                self.solve_link_collisions(other);
+            }
         }
     }
 

@@ -34,14 +34,20 @@ impl Point {
         if dist < min_dist {
             let dir = d / dist;
             let delta = 0.5 * (min_dist - dist);
-            self.pos_cur = self.pos_cur + 0.5 * dir * delta;
-            other.pos_cur = other.pos_cur - 0.5 * dir * delta;
+            if !self.is_fixed {
+                self.pos_cur = self.pos_cur + 0.5 * dir * delta;
+            }
+            if !other.is_fixed {
+                other.pos_cur = other.pos_cur - 0.5 * dir * delta;
+            }
         }
     }
 
     fn solve_link_collisions(&mut self, other: &mut Link) {
-        self.solve_point_collisions(&mut other.start);
-        self.solve_point_collisions(&mut other.end);
+        other
+            .points
+            .iter_mut()
+            .for_each(|p| self.solve_point_collisions(p));
     }
 }
 
@@ -54,7 +60,9 @@ impl PhysicsTarget for Point {
     }
 
     fn accelerate(&mut self, acc: &Vec2) {
-        self.acc = self.acc + acc.clone();
+        if !self.is_fixed {
+            self.acc = self.acc + acc.clone();
+        }
     }
 
     fn apply_constraints(&mut self, constraint: &Point) {

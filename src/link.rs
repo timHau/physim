@@ -6,52 +6,65 @@ use nannou::prelude::*;
 use std::any::Any;
 
 pub struct Link {
-    pub start: Point,
-    pub end: Point,
+    pub points: Vec<Point>,
     pub target_dist: f32,
 }
 
 impl PhysicsTarget for Link {
     fn update_position(&mut self, dt: f32) {
-        let axis = self.end.pos_cur - self.start.pos_cur;
-        let dist = axis.length();
-        if dist == 0.0 {
-            return;
-        }
+        for i in 1..self.points.len() {
+            if let Ok([prev, point]) = self.points.get_many_mut([i - 1, i]) {
+                let axis = point.pos_cur - prev.pos_cur;
+                let dist = axis.length();
+                if dist == 0.0 {
+                    return;
+                }
 
-        let dir = axis.normalize();
-        let delta = dist - self.target_dist;
-        if delta == 0.0 {
-            return;
-        }
+                let dir = axis.normalize();
+                let delta = dist - self.target_dist;
+                if delta == 0.0 {
+                    return;
+                }
 
-        self.start.pos_cur = self.start.pos_cur + 0.5 * dir * delta;
-        self.end.pos_cur = self.end.pos_cur - 0.5 * dir * delta;
+                if !point.is_fixed {
+                    point.pos_cur = point.pos_cur - 0.5 * dir * delta;
+                }
+                if !prev.is_fixed {
+                    prev.pos_cur = prev.pos_cur + 0.5 * dir * delta;
+                }
+                point.update_position(dt);
+            }
+        }
     }
 
     fn accelerate(&mut self, acc: &Vec2) {
-        self.start.accelerate(acc);
-        self.end.accelerate(acc);
+        self.points.iter_mut().for_each(|p| p.accelerate(acc));
     }
 
     fn render(&self, draw: &Draw) {
-        draw.line()
-            .start(self.start.pos_cur)
-            .end(self.end.pos_cur)
-            .weight(1.0)
-            .color(WHITE);
-        self.start.render(draw);
-        self.end.render(draw);
+        for i in 1..self.points.len() {
+            let prev = &self.points[i - 1];
+            let point = &self.points[i];
+            draw.line()
+                .start(prev.pos_cur)
+                .end(point.pos_cur)
+                .weight(1.0)
+                .color(WHITE);
+        }
+
+        self.points.iter().for_each(|p| p.render(draw));
     }
 
     fn apply_constraints(&mut self, constraint: &Point) {
-        self.start.apply_constraints(constraint);
-        self.end.apply_constraints(constraint);
+        self.points
+            .iter_mut()
+            .for_each(|p| p.apply_constraints(constraint));
     }
 
     fn solve_collisions(&mut self, other: &mut Box<dyn PhysicsTarget>) {
-        self.start.solve_collisions(other);
-        self.end.solve_collisions(other);
+        self.points
+            .iter_mut()
+            .for_each(|p| p.solve_collisions(other));
     }
 
     fn object_type(&mut self) -> &PhysicsObject {

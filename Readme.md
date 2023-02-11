@@ -3,8 +3,7 @@
 A toy *phy*sics *sim*ulation written in Rust, heavily inspired by [the awesome johnBuffer](https://www.youtube.com/watch?v=lS_qeBy3aQI).
 
 
-
-https://user-images.githubusercontent.com/12029285/218090302-91d7dc29-3922-4a9f-8ea4-d0913ce97485.mp4
+https://user-images.githubusercontent.com/12029285/218266694-6dd23052-458c-4017-855e-658e059fc0a8.mp4
 
 
 
